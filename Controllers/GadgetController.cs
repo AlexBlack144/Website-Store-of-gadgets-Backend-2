@@ -15,6 +15,8 @@ using System.IO;
 using System.Xml.Linq;
 using WebApplicationClient.Cach;
 using static Azure.Core.HttpHeader;
+using Microsoft.AspNetCore.Identity;
+
 namespace WebApplicationClient.Controllers
 {
     
@@ -23,6 +25,7 @@ namespace WebApplicationClient.Controllers
     public class GadgetController : ControllerBase
     {
         private IUnitOfWork _unitOfWork;
+        private readonly UserManager<IdentityUser> _userManager;
         //CacheService _cacheService = new CacheService();
         static string accessKey = "AKIAXTVX5PM2WVUPY72A";
         static string secretKey = "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";
@@ -64,9 +67,10 @@ namespace WebApplicationClient.Controllers
             return url;
         }
 
-        public GadgetController(IUnitOfWork unitOfWork)
+        public GadgetController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager)
         {
             this._unitOfWork = unitOfWork;
+            this._userManager = userManager;
         }
 
         ///POST
@@ -152,12 +156,15 @@ namespace WebApplicationClient.Controllers
 
         [HttpPost]
         [Route("BuyGadgets")]
-       // [Authorize(Roles = UserRoles.User)]
-        public IResult BuyGadgets([FromBody]List<BasketGadget> basketGadgets)
+        [Authorize(Roles = UserRoles.User)]
+        public async Task<IResult> BuyGadgets([FromBody]List<BasketGadget> basketGadgets)
         {
             try
             {
+                var user = await _userManager.FindByNameAsync(User.Identity.Name);
+
                 List<Gadget> gadgets = new List<Gadget>();
+                List<Purchase> purchases = new List<Purchase>();
                 foreach (var item in basketGadgets)
                 {
                     if (item.Sold == null)
@@ -172,13 +179,24 @@ namespace WebApplicationClient.Controllers
                     {
                         gadgets.Add(new Gadget(item.Id, item.Image, item.Name, item.Model, item.Price, (item.Quantity - item.Count), (item.Sold + item.Count), item.Status, item.IdCategory));
                     }
+                    purchases.Add(new Purchase(user.Id, item.Id, item.Count, item.Count*item.Price, DateTime.Now.ToString()));
+                    
+
                 }
                 foreach (var item in gadgets)
                 {
                     _unitOfWork.GadgetRepository.Update(item);
                 }
+
+                foreach (var item in purchases)
+                {
+                    _unitOfWork.PurchaseRepository.Create(item);
+                }
                 var gadgetsSql = _unitOfWork.GadgetRepository.GetAll();
                 //_cacheService.SetData("Gadget", gadgetsSql, DateTimeOffset.Now.AddDays(1));
+
+
+
                 return Results.StatusCode(StatusCodes.Status200OK);
             }
             catch
