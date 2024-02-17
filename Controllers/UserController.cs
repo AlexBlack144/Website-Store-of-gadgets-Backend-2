@@ -1,103 +1,67 @@
-﻿using DataAccessEF.Data;
-using DataAccessEF.Repositories;
-using DataAccessEF.UnitOfWork;
-using Domain.Interfaces;
+﻿using Domain.Interfaces;
 using Domain.Models;
 using Domain.Roles;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Xml.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace WebApplicationClient.Controllers
 {
     [Route("[controller]")]
-    [ApiController, Authorize]
+    [ApiController]
     public class UserController : ControllerBase
     {
         private IUnitOfWork _unitOfWork;
-        public static List<int> usersAuto = new List<int>();
-
-        public UserController(IUnitOfWork unitOfWork)
+        private readonly UserManager<IdentityUser> _userManager;
+        public UserController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager)
         {
             this._unitOfWork = unitOfWork;
+            this._userManager = userManager;
         }
-
-        /*[HttpPost]
-        [Route("Register User")]
-        public IResult Add(string name, string login, string email, string password )
+        [HttpPost]
+        [Route("GetUserIdLikeOrDis")]
+        [Authorize(Roles = UserRoles.User)]
+        public async Task<string> GetUserIdLikeOrDis([FromBody] int itemId)
         {
-            try
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var like_or_disSql = _unitOfWork.GadgetCommentsLikesDislikesRepository.GetAll();
+            string found = "none";
+            foreach (var item in like_or_disSql)
             {
-                if (!_db.Users.Any(x => x.Login.Equals(login.ToLower())))
+                if (item.IsLiked == true && item.FkAspNetUsersId == user.Id && item.FkGadgetsId== itemId)
                 {
-                    if (!_db.Users.Any(x => x.Email.Equals(email.ToLower())))
-                    {
-                        _db.Users.Add(new User() { Name = name, Login = login, Email = email, Password = password, IdGadget = null });
-                        _db.SaveChanges();
-                        return Results.StatusCode(StatusCodes.Status200OK);
-                    }
-                    else return Results.StatusCode(StatusCodes.Status400BadRequest);
+                    found = "Like";
                 }
-                else return Results.StatusCode(StatusCodes.Status400BadRequest);
-            }
-            catch { return Results.StatusCode(StatusCodes.Status404NotFound); }
-            
-        }*/
-
-        /*[HttpGet]
-        [Route("Authorization User")]
-        public IResult Authorization(string Login_or_Email, string Password)
-        {
-            usersAuto.Clear();
-            try
-            {
-                if (_db.Users.Any(x => x.Login.Equals(Login_or_Email)) || _db.Users.Any(x => x.Email.Equals(Login_or_Email)))
+                else if (item.IsDisliked == true && item.FkAspNetUsersId == user.Id && item.FkGadgetsId == itemId)
                 {
-                    if (_db.Users.Any(x => x.Password.Equals(Password)))
-                    {
-                        var user = _db.Users.AsEnumerable().Where(x => x.Login == Login_or_Email || x.Email == Login_or_Email).Select(y => y.Id);
-                        foreach (var item in user)
-                        {
-                            usersAuto.Add(item);
-                        }
-                        return Results.StatusCode(StatusCodes.Status200OK);
-                    }
-                    else return Results.StatusCode(StatusCodes.Status400BadRequest);
-                }
-                else return Results.StatusCode(StatusCodes.Status400BadRequest);
+                    found =  "Dislike";
+                } 
             }
-            catch { return Results.StatusCode(StatusCodes.Status404NotFound); }
-        }*/
-
+            return found;
+                
+        }
+        ///GET
         [HttpGet]
-        [Route("Buygadget")]
-        public IResult BuyGadget(int id_gadget)
+        [Route("GetUserId")]
+        [Authorize(Roles = $"{UserRoles.User}, {UserRoles.Manager}")]
+        public async Task<string> GetUserId()
         {
-            try
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userRole = _userManager.GetRolesAsync(user);
+            string id = "";
+            if (userRole.Result[0] == "Manager")
             {
-                _unitOfWork.UserRepository.Buy(id_gadget, usersAuto[0]);
-                return Results.StatusCode(StatusCodes.Status200OK);
+                id = "Manager";
             }
-            catch
+            else
             {
-                return Results.StatusCode(StatusCodes.Status400BadRequest);
+                id = user.Id.ToString();
             }
+            return id;
+
         }
 
-        [HttpGet]
-        [Route("GetUsers")]
-        [Authorize(Roles = UserRoles.Admin)]
-        public IEnumerable<User> GetUsers()
-        {
-            return _unitOfWork.UserRepository.GetAll();
-        }
-
-        [HttpGet]
-        [Route("GetUsersbyId")]
-        [Authorize(Roles = UserRoles.Admin)]
-        public User GetUserById(int id)
-        {
-            return _unitOfWork.UserRepository.GetId(id);
-        }
     }
 }

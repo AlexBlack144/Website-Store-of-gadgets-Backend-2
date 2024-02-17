@@ -173,11 +173,11 @@ namespace WebApplicationClient.Controllers
                     }
                     if ((item.Quantity - item.Count) == 0)
                     {
-                        gadgets.Add(new Gadget(item.Id, item.Image, item.Name, item.Model, item.Price, (item.Quantity - item.Count), (item.Sold + item.Count), false, item.IdCategory));
+                        gadgets.Add(new Gadget(item.Id, item.Image, item.Name, item.Description, item.Model, item.Price, (item.Quantity - item.Count), (item.Sold + item.Count), false, item.IdCategory));
                     }
                     else
                     {
-                        gadgets.Add(new Gadget(item.Id, item.Image, item.Name, item.Model, item.Price, (item.Quantity - item.Count), (item.Sold + item.Count), item.Status, item.IdCategory));
+                        gadgets.Add(new Gadget(item.Id, item.Image, item.Name, item.Description, item.Model, item.Price, (item.Quantity - item.Count), (item.Sold + item.Count), item.Status, item.IdCategory));
                     }
                     purchases.Add(new Purchase(user.Id, item.Id, item.Count, item.Count*item.Price, DateTime.Now.ToString()));
                     
@@ -316,5 +316,8 @@ namespace WebApplicationClient.Controllers
             return gadgets;*/
             return _unitOfWork.GadgetRepository.GetGadgetFilter(filter.nameModels, filter.min, filter.max);
         }
+
+        
+
     }
 }

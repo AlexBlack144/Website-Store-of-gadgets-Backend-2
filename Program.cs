@@ -46,7 +46,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddTransient<ICategoryRepository, CategoryRepositories>();
 builder.Services.AddTransient<IGadgetRepository, GadgetRepositories>();
-builder.Services.AddTransient<IUserRepository, UserRepositories>();
+builder.Services.AddTransient<IGadgetCommentsLikeDislikeRepository, GadgetCommentsLikeDislikeRepositories>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddDbContext<asp_tablesContext>();
 
