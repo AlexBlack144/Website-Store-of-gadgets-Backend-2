@@ -16,6 +16,7 @@ using System.Xml.Linq;
 using WebApplicationClient.Cach;
 using static Azure.Core.HttpHeader;
 using Microsoft.AspNetCore.Identity;
+using static System.Net.WebRequestMethods;
 
 namespace WebApplicationClient.Controllers
 {
@@ -211,87 +212,104 @@ namespace WebApplicationClient.Controllers
         [Route("GetGadgets")]
         public IEnumerable<Gadget> GetGadgets()
         {
-           /* List<Gadget> gadgets = _cacheService.GetData<List<Gadget>>("Gadget");
-            if (gadgets == null)
+            /* List<Gadget> gadgets = _cacheService.GetData<List<Gadget>>("Gadget");
+             if (gadgets == null)
+             {
+                 var gadgetsSql = _unitOfWork.GadgetRepository.GetAll();
+                 if (gadgetsSql.Count() > 0)
+                 {
+                     _cacheService.SetData("Gadget", gadgetsSql, DateTimeOffset.Now.AddDays(1));
+                     gadgets = gadgetsSql.ToList();
+                 }
+             }
+             return gadgets;*/
+            var result = _unitOfWork.GadgetRepository.GetAll();
+            foreach (var gadget in result)
             {
-                var gadgetsSql = _unitOfWork.GadgetRepository.GetAll();
-                if (gadgetsSql.Count() > 0)
-                {
-                    _cacheService.SetData("Gadget", gadgetsSql, DateTimeOffset.Now.AddDays(1));
-                    gadgets = gadgetsSql.ToList();
-                }
+                gadget.IdCategoryNavigation = _unitOfWork.CategoryRepository.GetId(gadget.IdCategory);
             }
-            return gadgets;*/
-            return _unitOfWork.GadgetRepository.GetAll();
+            return result;
         }
 
         [HttpGet]
         [Route("GetGadgetbyId")]
         public Gadget GetGadgetById(int id)
         {
-          /*  Gadget gadgets = _cacheService.GetData<Gadget>("Gadget");
-            if (gadgets == null)
-            {
-                var gadgetsSql = _unitOfWork.GadgetRepository.GetId(id);
-                if (gadgetsSql != null)
-                {
-                    _cacheService.SetData("Gadget", gadgetsSql, DateTimeOffset.Now.AddDays(1));
-                    gadgets = gadgetsSql;
-                }
-            }
-            else
-            {
-                var gadgetsSql = _unitOfWork.GadgetRepository.GetId(id);
-                gadgets = gadgetsSql;
-            }
-            return gadgets;*/
-            return _unitOfWork.GadgetRepository.GetId(id);
+            /*  Gadget gadgets = _cacheService.GetData<Gadget>("Gadget");
+              if (gadgets == null)
+              {
+                  var gadgetsSql = _unitOfWork.GadgetRepository.GetId(id);
+                  if (gadgetsSql != null)
+                  {
+                      _cacheService.SetData("Gadget", gadgetsSql, DateTimeOffset.Now.AddDays(1));
+                      gadgets = gadgetsSql;
+                  }
+              }
+              else
+              {
+                  var gadgetsSql = _unitOfWork.GadgetRepository.GetId(id);
+                  gadgets = gadgetsSql;
+              }
+              return gadgets;*/
+            var result = _unitOfWork.GadgetRepository.GetId(id);
+            result.IdCategoryNavigation = _unitOfWork.CategoryRepository.GetId(result.IdCategory);
+            return result;
         }
 
         [HttpGet]
         [Route("GetGadgetbyId_Category")]
         public IEnumerable<Gadget> GetGadgetByIdCategory(int id)
         {
-           /* List<Gadget> gadgets = _cacheService.GetData<List<Gadget>>("Gadget");
-            if (gadgets == null)
+            /* List<Gadget> gadgets = _cacheService.GetData<List<Gadget>>("Gadget");
+             if (gadgets == null)
+             {
+                 var gadgetsSql = _unitOfWork.GadgetRepository.GetbyIdCategory(id);
+                 if (gadgetsSql.Count() > 0)
+                 {
+                     _cacheService.SetData("Gadget", gadgetsSql, DateTimeOffset.Now.AddDays(1));
+                     gadgets = gadgetsSql.ToList();
+                 }
+             }
+             else {
+                 var gadgetsSql = _unitOfWork.GadgetRepository.GetbyIdCategory(id);
+                 gadgets = gadgetsSql.ToList();
+             }
+             return gadgets;*/
+            var result = _unitOfWork.GadgetRepository.GetbyIdCategory(id);
+            foreach (var gadget in result)
             {
-                var gadgetsSql = _unitOfWork.GadgetRepository.GetbyIdCategory(id);
-                if (gadgetsSql.Count() > 0)
-                {
-                    _cacheService.SetData("Gadget", gadgetsSql, DateTimeOffset.Now.AddDays(1));
-                    gadgets = gadgetsSql.ToList();
-                }
+                gadget.IdCategoryNavigation = _unitOfWork.CategoryRepository.GetId(gadget.IdCategory);
             }
-            else {
-                var gadgetsSql = _unitOfWork.GadgetRepository.GetbyIdCategory(id);
-                gadgets = gadgetsSql.ToList();
-            }
-            return gadgets;*/
-            return _unitOfWork.GadgetRepository.GetbyIdCategory(id);
+            return result;
         }
 
         [HttpGet]
         [Route("GetGadgetbyName")]
         public IEnumerable<Gadget> GetGadgetByName(string name)
         {
-           /* List<Gadget> gadgets = _cacheService.GetData<List<Gadget>>("Gadget");
-            if (gadgets == null)
+            /* List<Gadget> gadgets = _cacheService.GetData<List<Gadget>>("Gadget");
+             if (gadgets == null)
+             {
+                 var gadgetsSql = _unitOfWork.GadgetRepository.GetGadgetByName(name);
+                 if (gadgetsSql.Count() > 0)
+                 {
+                     _cacheService.SetData("Gadget", gadgetsSql, DateTimeOffset.Now.AddDays(1));
+                     gadgets = gadgetsSql.ToList();
+                 }
+                 else { gadgets = _unitOfWork.GadgetRepository.GetAll().ToList(); }
+             }
+             else
+             {
+                 var gadgetsSql = _unitOfWork.GadgetRepository.GetGadgetByName(name);
+                 gadgets = gadgetsSql.ToList();
+             }
+             return gadgets;*/
+            var result = _unitOfWork.GadgetRepository.GetGadgetByName(name);
+            foreach (var gadget in result)
             {
-                var gadgetsSql = _unitOfWork.GadgetRepository.GetGadgetByName(name);
-                if (gadgetsSql.Count() > 0)
-                {
-                    _cacheService.SetData("Gadget", gadgetsSql, DateTimeOffset.Now.AddDays(1));
-                    gadgets = gadgetsSql.ToList();
-                }
-                else { gadgets = _unitOfWork.GadgetRepository.GetAll().ToList(); }
+                gadget.IdCategoryNavigation = _unitOfWork.CategoryRepository.GetId(gadget.IdCategory);
             }
-            else
-            {
-                var gadgetsSql = _unitOfWork.GadgetRepository.GetGadgetByName(name);
-                gadgets = gadgetsSql.ToList();
-            }
-            return gadgets;*/
-            return _unitOfWork.GadgetRepository.GetGadgetByName(name);
+            return result;
         }
 
         [HttpPost]
@@ -314,7 +332,12 @@ namespace WebApplicationClient.Controllers
                 gadgets = gadgetsSql.ToList();
             }
             return gadgets;*/
-            return _unitOfWork.GadgetRepository.GetGadgetFilter(filter.nameModels, filter.min, filter.max);
+            var result = _unitOfWork.GadgetRepository.GetGadgetFilter(filter.nameModels, filter.min, filter.max);
+            foreach (var gadget in result)
+            {
+                gadget.IdCategoryNavigation = _unitOfWork.CategoryRepository.GetId(gadget.IdCategory);
+            }
+            return result;
         }
 
         

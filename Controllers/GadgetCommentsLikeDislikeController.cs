@@ -81,7 +81,7 @@ namespace WebApplicationClient.Controllers
             {
                 
                 var user = await _userManager.FindByNameAsync(User.Identity.Name);
-                var userRole = _userManager.GetRolesAsync(user);
+                var  userRole = await _userManager.GetRolesAsync(user);
                 var commentsSql = _unitOfWork.GadgetCommentsLikesDislikesRepository.GetAll();
                 foreach (var item in commentsSql)
                 {
@@ -89,7 +89,7 @@ namespace WebApplicationClient.Controllers
                     {
                         _unitOfWork.GadgetCommentsLikesDislikesRepository.Delete(item.Id);
                     }
-                    else if (userRole.Result[0] =="Manager")
+                    else if (userRole[0] =="Manager")
                     {
                         _unitOfWork.GadgetCommentsLikesDislikesRepository.Delete(item.Id);
                     }
