@@ -79,7 +79,6 @@ namespace WebApplicationClient.Controllers
         {
             try
             {
-                
                 var user = await _userManager.FindByNameAsync(User.Identity.Name);
                 var  userRole = await _userManager.GetRolesAsync(user);
                 var commentsSql = _unitOfWork.GadgetCommentsLikesDislikesRepository.GetAll();
@@ -91,7 +90,7 @@ namespace WebApplicationClient.Controllers
                     }
                     else if (userRole[0] =="Manager")
                     {
-                        _unitOfWork.GadgetCommentsLikesDislikesRepository.Delete(item.Id);
+                        _unitOfWork.GadgetCommentsLikesDislikesRepository.Delete(comment.Id);
                     }
                 }
                 return Results.StatusCode(StatusCodes.Status200OK);

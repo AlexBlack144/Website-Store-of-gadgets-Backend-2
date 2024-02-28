@@ -51,10 +51,18 @@ namespace WebApplicationClient.Controllers
         {
             try
             {
-                _unitOfWork.CategoryRepository.Delete(id);
-                var gadgetsSql = _unitOfWork.CategoryRepository.GetAll();
-                //_cacheService.SetData("Category", gadgetsSql, DateTimeOffset.Now.AddDays(1));
-                return Results.StatusCode(StatusCodes.Status200OK);
+                var resGadget = _unitOfWork.GadgetRepository.GetbyIdCategory(id);
+                if (resGadget.Count()==0)
+                {
+
+                    _unitOfWork.CategoryRepository.Delete(id);
+                    //var gadgetsSql = _unitOfWork.CategoryRepository.GetAll();
+                    //_cacheService.SetData("Category", gadgetsSql, DateTimeOffset.Now.AddDays(1));
+                    return Results.StatusCode(StatusCodes.Status200OK);
+                }
+                else {
+                    return Results.StatusCode(StatusCodes.Status400BadRequest);
+                }
             }
             catch
             {

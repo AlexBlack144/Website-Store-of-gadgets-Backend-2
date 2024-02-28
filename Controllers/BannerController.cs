@@ -28,6 +28,7 @@ namespace WebApplicationClient.Controllers
         static string accessKey = "AKIAXTVX5PM2WVUPY72A";
         static string secretKey = "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";
         static string bucket = "baner-kursak";
+        //static string bucket = "web-design-kursak";
 
         AmazonS3Client s3Client = new AmazonS3Client(accessKey, secretKey, Amazon.RegionEndpoint.EUWest2);
 

@@ -31,6 +31,7 @@ namespace WebApplicationClient.Controllers
         static string accessKey = "AKIAXTVX5PM2WVUPY72A";
         static string secretKey = "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";
         static string bucket = "web-imgs-kursak";
+        //static string bucket = "web-design-kursak";
         string UserName = "";
 
         AmazonS3Client s3Client = new AmazonS3Client(accessKey, secretKey, Amazon.RegionEndpoint.EUWest2);
@@ -144,13 +145,28 @@ namespace WebApplicationClient.Controllers
         {
             try
             {
+                var resCLDG = _unitOfWork.GadgetCommentsLikesDislikesRepository.GetbyIdGadget(id);
+                List<GCLDforOneController> gadgetCommentsLikeDislikes = new List<GCLDforOneController>();
+                foreach (var item in resCLDG)
+                {
+                    gadgetCommentsLikeDislikes.Add(new GCLDforOneController(item.Id));
+                }
+                
+                if (gadgetCommentsLikeDislikes.Count > 0)
+                {
+                    foreach (var item in gadgetCommentsLikeDislikes)
+                    {
+                        _unitOfWork.GadgetCommentsLikesDislikesRepository.Delete(item.Id);
+                    }
+                }
                 _unitOfWork.GadgetRepository.Delete(id);
-                var gadgetsSql = _unitOfWork.GadgetRepository.GetAll();
+                //var gadgetsSql = _unitOfWork.GadgetRepository.GetAll();
                 //_cacheService.SetData("Gadget", gadgetsSql, DateTimeOffset.Now.AddDays(1));
                 return Results.StatusCode(StatusCodes.Status200OK);
             }
             catch
             {
+
                 return Results.StatusCode(StatusCodes.Status400BadRequest);
             }
         }
@@ -226,7 +242,11 @@ namespace WebApplicationClient.Controllers
             var result = _unitOfWork.GadgetRepository.GetAll();
             foreach (var gadget in result)
             {
-                gadget.IdCategoryNavigation = _unitOfWork.CategoryRepository.GetId(gadget.IdCategory);
+                if (_unitOfWork.CategoryRepository.GetId(gadget.IdCategory) != null)
+                {
+                    gadget.IdCategoryNavigation = _unitOfWork.CategoryRepository.GetId(gadget.IdCategory);
+                }
+                
             }
             return result;
         }
